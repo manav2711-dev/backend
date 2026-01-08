@@ -179,14 +179,15 @@ router.post("/googlelogin", async (req, res) => {
 router.post("/mob/register", 
 	// celebrate({body: authSchema.register.unknown(true)}), 
 	async (req, res) => {
-	const {fullname, email, password } = req.body
+	const {fullname, email, password,phone } = req.body
 
 	try {
 		const salt = randomBytes(16).toString("hex");
 		const passwordHash = generateLoginHash(password,salt);
 		await User.create({
 			fullname, 
-			email, 
+			email,
+			phone, 
 			password: passwordHash, 
 			salt:salt
 		})

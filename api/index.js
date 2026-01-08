@@ -80,6 +80,6 @@ app.get("/", (req, res) => {
 // format celebrate paramater validation errors
 app.use(formatCelebrateErrors)
 
-app.listen(process.env.PORT || 5000, () => {
+app.listen(process.env.PORT || 5000,"0.0.0.0", () => {
 	console.log(`Listening on port ${process.env.PORT || 5000}`)
 })
