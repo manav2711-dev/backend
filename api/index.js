@@ -2,6 +2,7 @@ const express = require('express')
 const mongoose = require('mongoose')
 const dotenv = require('dotenv')
 const cors = require('cors')
+const session = require("express-session");
 dotenv.config()
 
 
@@ -35,6 +36,19 @@ mongoose.connect(process.env.DB_URL, {
 app.use(cors())
 app.use(express.json())
 app.use(handleMalformedJson) // handle common req errors
+app.use(
+  session({
+    name: "pm.sid",
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: false,          // true only if HTTPS
+      maxAge: 15 * 60 * 1000  // 15 minutes
+    }
+  })
+);
 
 
 // routes

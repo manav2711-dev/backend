@@ -228,10 +228,13 @@ router.post("/mob/login",
 			{expiresIn: "3d"},
 		)
 
-		// const aesKey = deriveAesKey(
-		// 	password,
-		// 	user.salt
-		// )
+		const aesKey = deriveAesKey(
+			password,
+			user.salt
+		)
+
+		req.session.aesKey = aesKey;
+		req.session.userId = user._id.toString();
 
 		return res.json({ 
 			...authResponse.loginSuccess,
@@ -246,10 +249,32 @@ router.post("/mob/login",
 router.post("/mob/encrypt", 
 	// celebrate({ body: authSchema.login }), 
 	async (req, res) => {
+
+	if (!req.session || !req.session.aesKey) {
+         return res.status(401).json({
+         message: "Session expired. Please login again."
+     });
+     }
+
+     let aesKey = req.session.aesKey;
+
+	//  console.log(aesKey)
+
+	if (aesKey && aesKey.type === "Buffer") {
+	aesKey = Buffer.from(aesKey.data);
+   }
+
+    if (!Buffer.isBuffer(aesKey) || aesKey.length !== 32) {
+    return res.status(500).json({
+      message: "Invalid AES key in session"
+    });
+    }
+
 	const { name,dataPassword,masterPassword,email } = req.body
     const user = await User.findOne({ email })
+
 		try {
-		const aesKey = deriveAesKey(masterPassword,user.salt);
+		// const aesKey = deriveAesKey(masterPassword,user.salt);
 		const encrypted = encryptPassword(dataPassword,aesKey)
 		await Password.create({
 			userId:user._id,
@@ -269,13 +294,34 @@ router.post("/mob/encrypt",
 router.post("/mob/decrypt", 
 	// celebrate({ body: authSchema.login }), 
 	async (req, res) => {
-	const { userId,masterPassword } = req.body
-    const user = await User.findById(userId)
-	console.log("user",user)
-	const passData = await Password.findOne({userId});
+
+	if (!req.session || !req.session.aesKey) {
+         return res.status(401).json({
+         message: "Session expired. Please login again."
+     });
+     }
+
+     let aesKey = req.session.aesKey;
+
+	 if (aesKey && aesKey.type === "Buffer") {
+      aesKey = Buffer.from(aesKey.data);
+     }
+
+    if (!Buffer.isBuffer(aesKey) || aesKey.length !== 32) {
+    return res.status(500).json({
+      message: "Invalid AES key in session"
+    });
+    }
+
+	const { passId } = req.body
+    // const user = await User.findById(userId)
+	// console.log("user",user)
+
+	const passData = await Password.findOne({_id:passId});
 	console.log("PassData",passData)
+
 		try {
-		const aesKey = deriveAesKey(masterPassword,user.salt);
+		// const aesKey = deriveAesKey(masterPassword,user.salt);
 		const decrypted = decryptPassword(passData,aesKey)
 		res.status(201).json(decrypted)
 
@@ -286,6 +332,22 @@ router.post("/mob/decrypt",
 })
 
 
+
+router.post("/mob/getPasswords", 
+	// celebrate({ body: authSchema.login }), 
+	async (req, res) => {
+	const { userId} = req.body
+    // const user = await User.findById(userId)
+	// console.log("user",user)
+		try {
+			const passData = await Password.find({userId});
+	        console.log("PassData",passData)
+		    res.status(201).json(passData)
+	} catch (err) {
+		console.error(err)
+		res.status(500).json(authResponse.unexpectedError)
+	}
+})
 
 const authResponse = {
 	userCreated: { 
