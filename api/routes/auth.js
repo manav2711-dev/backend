@@ -239,6 +239,11 @@ router.post("/mob/login",
 		return res.json({ 
 			...authResponse.loginSuccess,
 			accessToken: jwtToken,
+			user:{
+				id:user._id,
+				name:user.fullname,
+				email:user.email,
+			}
 		})
 	} else {
 		return res.status(401).json(authResponse.loginFailed)
@@ -314,6 +319,7 @@ router.post("/mob/decrypt",
     }
 
 	const { passId } = req.body
+	console.log("body",req.body)
     // const user = await User.findById(userId)
 	// console.log("user",user)
 
@@ -323,7 +329,7 @@ router.post("/mob/decrypt",
 		try {
 		// const aesKey = deriveAesKey(masterPassword,user.salt);
 		const decrypted = decryptPassword(passData,aesKey)
-		res.status(201).json(decrypted)
+		res.status(200).json(decrypted)
 
 	} catch (err) {
 		console.error(err)
@@ -337,6 +343,7 @@ router.post("/mob/getPasswords",
 	// celebrate({ body: authSchema.login }), 
 	async (req, res) => {
 	const { userId} = req.body
+	console.log("userID",req.body);
     // const user = await User.findById(userId)
 	// console.log("user",user)
 		try {

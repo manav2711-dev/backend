@@ -23,6 +23,7 @@
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.0.2",
     "nodemailer": "^7.0.12",
+    "os": "^0.1.2",
     "razorpay": "^2.9.6",
     "stripe": "^8.183.0",
     "uuid": "^13.0.0"

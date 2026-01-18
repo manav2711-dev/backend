@@ -3,6 +3,7 @@ const mongoose = require('mongoose')
 const dotenv = require('dotenv')
 const cors = require('cors')
 const session = require("express-session");
+const os = require("os");
 dotenv.config()
 
 
@@ -18,6 +19,8 @@ const {
   handleMalformedJson,
   formatCelebrateErrors
 } = require('./middlewares/handleError')
+const PORT = process.env.PORT || 5000;
+const HOST = "0.0.0.0";
 
 const app = express()
 
@@ -94,6 +97,19 @@ app.get("/", (req, res) => {
 // format celebrate paramater validation errors
 app.use(formatCelebrateErrors)
 
-app.listen(process.env.PORT || 5000,"0.0.0.0", () => {
-	console.log(`Listening on port ${process.env.PORT || 5000}`)
+app.listen(PORT,HOST, () => {
+	console.log(`Server listening on port ${PORT}`);
+  printIPs(PORT);
 })
+
+function printIPs(port) {
+  const interfaces = os.networkInterfaces();
+
+  Object.keys(interfaces).forEach((ifaceName) => {
+    interfaces[ifaceName].forEach((iface) => {
+      if (iface.family === "IPv4" && !iface.internal) {
+        console.log(`→ http://${iface.address}:${port}`);
+      }
+    });
+  });
+}
