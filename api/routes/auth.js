@@ -275,19 +275,24 @@ router.post("/mob/encrypt",
     });
     }
 
-	const { name,dataPassword,masterPassword,email } = req.body
-    const user = await User.findOne({ email })
+	const { passData, userId } = req.body
+	console.log("req.body",req.body);
+    const user = await User.findById({ _id:userId })
+	// console.log("pass user",user);
 
 		try {
 		// const aesKey = deriveAesKey(masterPassword,user.salt);
-		const encrypted = encryptPassword(dataPassword,aesKey)
+		const encrypted = encryptPassword(passData.password,aesKey)
 		await Password.create({
 			userId:user._id,
-			name, 
+			username:passData.username,
+			name:passData.name, 
+			description:passData.description,
 			iv:encrypted.iv, 
 			ciphertext: encrypted.ciphertext, 
 			authTag:encrypted.authTag,
 		})
+		console.log(authResponse.passCreated);
 		res.status(201).json(authResponse.passCreated)
 
 	} catch (err) {
