@@ -243,6 +243,7 @@ router.post("/mob/login",
 				id:user._id,
 				name:user.fullname,
 				email:user.email,
+				phone:user.phone,
 			}
 		})
 	} else {
